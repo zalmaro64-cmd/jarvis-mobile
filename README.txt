@@ -16,6 +16,7 @@ Current features:
 - Time/date, basic arithmetic, and Google searches.
 
 Limitations:
+noVoice:"La reconnaissance vocale n'est pas prise en charge dans ce navigateur. Vous pouvez écrire.",
 - Voice recognition support depends on Android browser support and internet connection.
 - The app does not yet connect to a generative AI service.
 - It does not listen continuously for "Hey JARVIS".

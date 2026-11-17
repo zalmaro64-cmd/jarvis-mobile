@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#03101f">
+<link rel="manifest" href="manifest.webmanifest">
+<title>JARVIS Mobile</title>
+<style>
+:root{color-scheme:dark;--cyan:#18cfff;--blue:#087bff;--panel:#071a2d;--muted:#9fc5df}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% 25%,#092f59 0,#03101f 43%,#010711 100%);color:#eaf8ff;font-family:system-ui,Arial,sans-serif;min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 18px 8px}
+h1{margin:0;letter-spacing:.22em;font-size:25px;color:#60dcff;text-shadow:0 0 16px #008cff}
+.sub{font-size:10px;letter-spacing:.35em;color:#a7eaff;text-align:center}
+.status{font-size:12px;color:#57ffb2}
+main{max-width:560px;margin:auto;padding:10px 16px 28px}
+.core-wrap{display:grid;place-items:center;margin:14px auto 18px}
+.core{width:min(62vw,250px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;border:2px solid #1acbff;box-shadow:0 0 18px #007dff,inset 0 0 32px #007dff55,0 0 70px #006eff55;position:relative;background:radial-gradient(circle,#0d4e83 0,#062544 52%,#03101f 70%)}
+.core:before,.core:after{content:"";position:absolute;inset:12px;border:1px dashed #54dfff;border-radius:50%;animation:spin 18s linear infinite}
+.core:after{inset:28px;border:5px solid #0c91df55;border-left-color:#4beaff;border-right-color:#4beaff;animation-direction:reverse;animation-duration:9s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.eye{font-size:58px;color:#8bf1ff;text-shadow:0 0 18px #00aaff}
+.statusline{text-align:center;color:#65ffbd;font-size:13px;margin-bottom:14px}
+.panel{background:#06182acc;border:1px solid #087dbb;border-radius:16px;padding:14px;box-shadow:0 0 18px #006d9d33;margin:12px 0}
+label{font-size:12px;color:var(--muted)}
+select,input,button{font:inherit}
+select,input{width:100%;background:#03101f;color:#eaf8ff;border:1px solid #167bb1;border-radius:10px;padding:12px;margin-top:6px}
+#log{height:190px;overflow:auto;display:flex;flex-direction:column;gap:9px}
+.msg{padding:9px 11px;border-radius:12px;max-width:94%;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
+.jarvis{align-self:flex-start;background:#0a2d49;border:1px solid #087dbb}
+.user{align-self:flex-end;background:#073d66;border:1px solid #18a9e7}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:1px solid #16bfff;background:linear-gradient(145deg,#073c68,#041629);color:#eafaff;border-radius:12px;padding:13px 10px;cursor:pointer}
+button:active{transform:scale(.98)}
+.primary{grid-column:1/-1;border-radius:50px;padding:18px;font-weight:700;font-size:16px;box-shadow:0 0 22px #008dff66}
+#sendrow{display:flex;gap:8px;margin-top:10px}
+#sendrow input{flex:1;min-width:0}
+#sendrow button{min-width:76px}
+.small{font-size:11px;color:#9bbbd0;line-height:1.5}
+footer{text-align:center;color:#4acdf5;font-size:11px;letter-spacing:.1em;padding:18px}
+</style>
+</head>
+<body>
+<header><div><h1>JARVIS</h1><div class="sub">PERSONAL ASSISTANT</div></div><div class="status" id="status">● READY</div></header>
+<main>
+  <div class="core-wrap"><div class="core"><div class="eye">◉</div></div></div>
+  <div class="statusline" id="hint">Ready. Choose a language and speak or type.</div>
+  <section class="panel">
+    <label for="language">VOICE / RECOGNITION LANGUAGE</label>
+    <select id="language">
+      <option value="en-US">English</option>
+      <option value="ar-SA">العربية</option>
+      <option value="fr-FR">Français</option>
+    </select>
+  </section>
+  <section class="panel">
+    <div id="log" aria-live="polite">
+      <div class="msg jarvis">Hello! I'm JARVIS. I can tell the time, do simple calculations, and search the web. Choose English, Arabic, or French above.</div>
+    </div>
+    <div id="sendrow"><input id="text" placeholder="Type a message…" autocomplete="off"><button id="send">Send</button></div>
+  </section>
+  <section class="controls">
+    <button class="primary" id="mic">🎙️ TAP TO SPEAK</button>
+    <button id="time">🕒 Time</button><button id="help">❔ Help</button>
+    <button id="search">🌐 Search web</button><button id="stop">🔇 Stop voice</button>
+  </section>
+  <section class="panel small">
+    <b>Prototype notes:</b> Voice recognition needs internet and browser microphone permission. Spoken replies use voices installed on your phone. This first version does not yet connect to a generative AI service, continuously listen for a wake word, or control phone settings.
+  </section>
+</main>
+<footer>JARVIS MOBILE · VERSION 1.0</footer>
+<script>
+const $=id=>document.getElementById(id);
+const log=$('log'), lang=$('language');
+const messages={
+ 'en-US':{hello:"Hello! I'm JARVIS. How can I help?",time:"The time is ",date:"Today is ",help:"Try: hello, time, date, calculate 12 times 4, or search for space news.",unknown:"I can help with the time, date, simple calculations, and web searches. A full AI brain is the next upgrade.",listening:"Listening… speak now.",noVoice:"Voice recognition is not supported in this browser. You can still type.",search:"What should I search for?",calc:"The answer is "},
+ 'ar-SA':{hello:"مرحباً! أنا جارفيس. كيف يمكنني مساعدتك؟",time:"الوقت الآن ",date:"تاريخ اليوم ",help:"جرّب أن تقول: مرحباً، الوقت، التاريخ، أو ابحث عن أخبار الفضاء.",unknown:"أستطيع مساعدتك في الوقت والتاريخ والحسابات البسيطة والبحث على الإنترنت. إضافة الذكاء الاصطناعي الكامل ستكون في التحديث القادم.",listening:"أنا أستمع… تفضل بالتحدث.",noVoice:"التعرّف على الصوت غير مدعوم في هذا المتصفح. يمكنك الكتابة.",search:"عمّ تريد أن أبحث؟",calc:"النتيجة هي "},
+ 'fr-FR':{hello:"Bonjour ! Je suis JARVIS. Comment puis-je vous aider ?",time:"Il est ",date:"Nous sommes le ",help:"Essayez : bonjour, heure, date, calculer 12 fois 4, ou rechercher des nouvelles spatiales.",unknown:"Je peux donner l'heure et la date, faire des calculs simples et effectuer des recherches sur le Web. L'IA complète sera ajoutée dans une prochaine version.",listening:"J'écoute… parlez maintenant.",noVoice:"La reconnaissance vocale n'est pas prise en charge dans ce navigateur. Vous pouvez écrire.",search:"Que voulez-vous rechercher ?",calc:"Le résultat est "}
+};
+function add(text,who){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight}
+function speak(text){if(!('speechSynthesis'in window))return; speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang.value;u.rate=0.96;const voices=speechSynthesis.getVoices();const prefix=lang.value.split('-')[0];const v=voices.find(x=>x.lang.toLowerCase().startsWith(prefix));if(v)u.voice=v;speechSynthesis.speak(u)}
+function reply(text){add(text,'jarvis');speak(text)}
+function normalized(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+function handle(raw){
+ const q=raw.trim();if(!q)return;add(q,'user');
+ const m=messages[lang.value],n=normalized(q);
+ if(/^(hi|hello|hey|مرحبا|مرحباً|السلام عليكم|bonjour|salut)\b?/i.test(q)){reply(m.hello);return}
+ if(n.includes('time')||n.includes('heure')||n.includes('الوقت')||n.includes('الساع')){reply(m.time+new Intl.DateTimeFormat(lang.value,{hour:'numeric',minute:'2-digit'}).format(new Date()));return}
+ if(n.includes('date')||n.includes('today')||n.includes('تاريخ')||n.includes('اليوم')||n.includes("quelle date")){reply(m.date+new Intl.DateTimeFormat(lang.value,{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date()));return}
+ if(n==='help'||n.includes('what can you do')||n.includes('ماذا تستطيع')||n.includes('aide')){reply(m.help);return}
+ if(n.startsWith('search for ')||n.startsWith('search ')||n.startsWith('ابحث عن ')||n.startsWith('recherche ')){
+   let term=q.replace(/^(search for |search |ابحث عن |recherche )/i,'').trim();
+   if(term){window.open('https://www.google.com/search?q='+encodeURIComponent(term),'_blank');reply(lang.value==='ar-SA'?'سأبحث على الإنترنت عن '+term:lang.value==='fr-FR'?'Je recherche sur le Web : '+term:'Searching the web for '+term+'.')}else reply(m.search);return
+ }
+ const calcMatch=n.match(/^(?:calculate|calcule|احسب)\s+(.+)$/);
+ if(calcMatch){try{const expr=calcMatch[1].replace(/times|multiplied by|fois|ضرب|x/g,'*').replace(/divided by|divise par|على/g,'/').replace(/plus| زائد /g,'+').replace(/minus|moins|ناقص/g,'-');if(!/^[\d\s()+\-*/%.]+$/.test(expr))throw Error();const val=Function('"use strict";return ('+expr+')')();if(!Number.isFinite(val))throw Error();reply(m.calc+val)}catch{reply(lang.value==='ar-SA'?'لم أتمكن من حساب ذلك.':'I could not calculate that. Try a simple expression such as 12 * 4.')}return}
+ reply(m.unknown)
+}
+$('send').onclick=()=>{handle($('text').value);$('text').value=''};
+$('text').addEventListener('keydown',e=>{if(e.key==='Enter')$('send').click()});
+$('time').onclick=()=>handle(lang.value==='ar-SA'?'ما الوقت الآن؟':lang.value==='fr-FR'?'Quelle heure est-il ?':'What time is it?');
+$('help').onclick=()=>handle('help');
+$('search').onclick=()=>{const q=prompt(messages[lang.value].search);if(q)handle((lang.value==='ar-SA'?'ابحث عن ':lang.value==='fr-FR'?'recherche ':'search for ')+q)};
+$('stop').onclick=()=>speechSynthesis.cancel();
+$('mic').onclick=()=>{
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){reply(messages[lang.value].noVoice);return}
+ const rec=new SR();rec.lang=lang.value;rec.interimResults=false;rec.maxAlternatives=1;
+ $('status').textContent='● LISTENING';$('hint').textContent=messages[lang.value].listening;
+ rec.onresult=e=>{const said=e.results[0][0].transcript;$('text').value='';handle(said)};
+ rec.onerror=e=>{add('Microphone error: '+e.error,'jarvis');$('status').textContent='● READY';$('hint').textContent='Ready.'};
+ rec.onend=()=>{$('status').textContent='● READY';$('hint').textContent='Ready for your next command.'};
+ try{rec.start()}catch(e){reply(messages[lang.value].noVoice)}
+};
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>

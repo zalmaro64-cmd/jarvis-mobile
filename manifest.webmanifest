@@ -1,0 +1,10 @@
+{
+  "name": "JARVIS Mobile Assistant",
+  "short_name": "JARVIS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#03101f",
+  "theme_color": "#03101f",
+  "description": "A multilingual personal assistant prototype",
+  "icons": []
+}
